@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "Telegram File Uploader"
+version = "0.1.0"
+description = ""
+authors = ["Alex <120180702+moveitaway@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = "^2.23.1"
+aiofile = "^3.8.1"
+aioshutil = "^1.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,4 @@
+.env.docker
+.idea
+uploads
+.docker/telegram-bot-api-data

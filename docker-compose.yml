@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  bot:
+    build:
+      dockerfile: ./.docker/Dockerfile
+      context: .
+    restart: always
+    env_file:
+      - .env.docker
+    volumes:
+      - ./uploads:/app/uploads
+      - ./.docker/telegram-bot-api-data:/app/telegram-bot-api-data
+
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    env_file:
+      - .env.docker
+    volumes:
+      - ./.docker/telegram-bot-api-data:/var/lib/telegram-bot-api
+    ports:
+      - "8081:8081"
