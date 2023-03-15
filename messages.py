@@ -1,6 +1,11 @@
+import os.path
+
+from utils import human_size
+
+
 def HELLO() -> str:
     return ("<b>[Telegram File Storage bot]</b>\n\n" +
-            "Welcome to Telegram File Storage bot." +
+            "Welcome to Telegram File Storage bot. " +
             "To use this bot just me the file that you want to upload to my server.")
 
 
@@ -15,7 +20,9 @@ def UNEXPECTED_ERROR() -> str:
             "Oh no! Something went wrong. Please try again.")
 
 
-def SAVED(file_path: str) -> str:
-    return ("<b>[Successfully saved]</b>\n\n" +
-            "File successfully saved. You can download it using following link:\n\n" +
+def SAVED(file_path: str, file_size: int) -> str:
+    return ("<b>[Successfully saved]</b>\n\n"
+            f"<b>📁 Location</b>: Inbox\n"
+            f"<b>🗒 Name</b>: <code>{os.path.basename(file_path)}</code>\n"
+            f"<b>🔢 Size</b>: {human_size(file_size)}\n\n"
             f"<code>{file_path}</code>")

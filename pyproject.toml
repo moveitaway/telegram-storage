@@ -9,6 +9,7 @@ python = "^3.10"
 aiogram = "^2.23.1"
 aiofile = "^3.8.1"
 aioshutil = "^1.2"
+shortuuid = "^1.0.11"
 
 [tool.poetry.dev-dependencies]
 

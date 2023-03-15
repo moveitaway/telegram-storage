@@ -1,13 +1,14 @@
 import asyncio
+import dataclasses
 import os
 import sys
 from os import getenv
-from secrets import token_hex
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.bot.api import TelegramAPIServer
 from aiogram.types import ContentType
 from aioshutil import move
+from shortuuid import uuid
 
 import messages
 from utils import find_biggest_photo
@@ -28,18 +29,31 @@ local_server = TelegramAPIServer.from_base(TELEGRAM_LOCAL_API)
 bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML, server=local_server)
 
 
-async def download_file(file_path: str) -> str | None:
+@dataclasses.dataclass
+class UploadedFile:
+    public_path: str
+    fs_path: str
+    name: str
+    size: int
+
+
+async def download_file(file_path: str) -> UploadedFile | None:
     # we have to have telegram-bot-api mounted to bot container
     local_file_path = file_path.replace('/var/lib/telegram-bot-api', 'telegram-bot-api-data')
 
     extension = f'.{local_file_path[-3:]}' if '.' in local_file_path else ''
-    file_name = token_hex(32)
+    file_name = uuid()
     os.makedirs(os.path.join(UPLOAD_DIRECTORY, file_name[0], file_name[1], file_name[2]))
     output_file_name = os.path.join(UPLOAD_DIRECTORY, file_name[0], file_name[1], file_name[2],
                                     f'{file_name}{extension}')
     await move(local_file_path, output_file_name)
 
-    return output_file_name.replace(UPLOAD_DIRECTORY, '')[1:]
+    return UploadedFile(
+        public_path=output_file_name.replace(UPLOAD_DIRECTORY, '')[1:],
+        fs_path=output_file_name,
+        name=os.path.basename(output_file_name),
+        size=os.stat(output_file_name).st_size
+    )
 
 
 def get_public_file_link(file_name: str) -> str:
@@ -48,8 +62,9 @@ def get_public_file_link(file_name: str) -> str:
 
 def file_link_markup(public_file_path: str) -> types.InlineKeyboardMarkup:
     reply_markup = types.InlineKeyboardMarkup()
-    reply_markup.row(
-        types.InlineKeyboardButton('Download file', url=public_file_path))
+    reply_markup.row(types.InlineKeyboardButton('🌎 Open in Browser', url=public_file_path))
+    # reply_markup.row(types.InlineKeyboardButton('📁 Move to Folder', callback_data='move_to_folder'))
+    # reply_markup.row(types.InlineKeyboardButton('🗒 Add Note', callback_data='add_note'))
 
     return reply_markup
 
@@ -69,7 +84,7 @@ async def message_handler(message: types.Message):
     if bool(message.photo):
         photo_to_download = find_biggest_photo(message.photo)
         if not photo_to_download:
-            raise RuntimeError('This code should not be reacted')
+            raise RuntimeError('This code should not be reached')
         file_id = photo_to_download.file_id
     elif message.document is not None:
         file_id = message.document.file_id
@@ -85,13 +100,15 @@ async def message_handler(message: types.Message):
         raise RuntimeError('This code should not be reached')
 
     file_info = await bot.get_file(file_id)
-    downloaded_file_path = await download_file(file_info.file_path)
-    if not downloaded_file_path:
+    uploaded_file = await download_file(file_info.file_path)
+    if not uploaded_file:
         return await message.reply(messages.UNEXPECTED_ERROR())
-    public_file_path = get_public_file_link(downloaded_file_path)
+    public_file_path = get_public_file_link(uploaded_file.public_path)
 
-    return await message.reply(messages.SAVED(public_file_path),
-                               reply_markup=file_link_markup(public_file_path))
+    await message.answer(messages.SAVED(public_file_path, uploaded_file.size),
+                         reply_markup=file_link_markup(public_file_path))
+    await asyncio.sleep(delay=3)
+    return await message.delete()
 
 
 async def main():
