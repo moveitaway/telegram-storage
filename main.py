@@ -90,6 +90,7 @@ async def message_handler(message: types.Message):
         need_preview = True
     elif message.document is not None:
         file_id = message.document.file_id
+        need_preview = True
     elif message.audio is not None:
         file_id = message.audio.file_id
     elif message.animation is not None:
