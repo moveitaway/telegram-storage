@@ -44,12 +44,12 @@ async def download_file(file_path: str) -> UploadedFile | None:
     extension = f'.{local_file_path[-3:]}' if '.' in local_file_path else ''
     file_name = uuid()
     os.makedirs(os.path.join(UPLOAD_DIRECTORY, file_name[0], file_name[1]))
-    os.chmod(os.path.join(UPLOAD_DIRECTORY, file_name[0]), mode=755)
-    os.chmod(os.path.join(UPLOAD_DIRECTORY, file_name[0], file_name[1]), mode=755)
+    os.chmod(os.path.join(UPLOAD_DIRECTORY, file_name[0]), 0o755)
+    os.chmod(os.path.join(UPLOAD_DIRECTORY, file_name[0], file_name[1]), 0o755)
     output_file_name = os.path.join(UPLOAD_DIRECTORY, file_name[0], file_name[1],
                                     f'{file_name}{extension}')
     await move(local_file_path, output_file_name)
-    os.chmod(output_file_name, mode=644)
+    os.chmod(output_file_name, mode=0o644)
 
     return UploadedFile(
         public_path=output_file_name.replace(UPLOAD_DIRECTORY, '')[1:],
