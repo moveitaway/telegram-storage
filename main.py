@@ -81,19 +81,23 @@ async def message_handler(message: types.Message):
                [message.photo, message.document, message.audio, message.animation, message.video, message.voice]):
         return await message.reply(messages.UNSUPPORTED_MESSAGE())
 
+    need_preview = False
     if bool(message.photo):
         photo_to_download = find_biggest_photo(message.photo)
         if not photo_to_download:
             raise RuntimeError('This code should not be reached')
         file_id = photo_to_download.file_id
+        need_preview = True
     elif message.document is not None:
         file_id = message.document.file_id
     elif message.audio is not None:
         file_id = message.audio.file_id
     elif message.animation is not None:
         file_id = message.animation.file_id
+        need_preview = True
     elif message.video is not None:
         file_id = message.video.file_id
+        need_preview = True
     elif message.voice is not None:
         file_id = message.voice.file_id
     else:
@@ -105,8 +109,8 @@ async def message_handler(message: types.Message):
         return await message.reply(messages.UNEXPECTED_ERROR())
     public_file_path = get_public_file_link(uploaded_file.public_path)
 
-    await message.answer(messages.SAVED(public_file_path, uploaded_file.size),
-                         reply_markup=file_link_markup(public_file_path))
+    await message.answer(messages.SAVED(public_file_path, uploaded_file.size, need_preview),
+                         reply_markup=file_link_markup(public_file_path), disable_web_page_preview=False)
     await asyncio.sleep(delay=3)
     return await message.delete()
 

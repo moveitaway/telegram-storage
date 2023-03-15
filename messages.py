@@ -20,9 +20,10 @@ def UNEXPECTED_ERROR() -> str:
             "Oh no! Something went wrong. Please try again.")
 
 
-def SAVED(file_path: str, file_size: int) -> str:
+def SAVED(file_path: str, file_size: int, need_preview: bool) -> str:
     return ("<b>[Successfully saved]</b>\n\n"
             f"<b>📁 Location</b>: Inbox\n"
             f"<b>🗒 Name</b>: <code>{os.path.basename(file_path)}</code>\n"
             f"<b>🔢 Size</b>: {human_size(file_size)}\n\n"
-            f"<code>{file_path}</code>")
+            f"<code>{file_path}</code>"
+            f"<a href=\"{file_path}\">ㅤ</a>" if need_preview else "")
