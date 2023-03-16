@@ -15,9 +15,12 @@ RUN \
 
 WORKDIR /app
 
-COPY entrypoint.sh poetry.lock pyproject.toml ./
+COPY alembic.ini entrypoint.sh entrypoint-migrations.sh poetry.lock pyproject.toml ./
 RUN poetry install
 
-COPY main.py messages.py utils.py ./
+COPY assets ./assets
+COPY bot ./bot
+COPY common ./common
+COPY migrations ./migrations
 
 CMD ["sh", "entrypoint.sh"]

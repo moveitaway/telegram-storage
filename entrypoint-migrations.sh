@@ -2,4 +2,4 @@
 
 export PYTHONPATH="${PYTHONPATH}:/app"
 
-python bot/main.py
+alembic upgrade head

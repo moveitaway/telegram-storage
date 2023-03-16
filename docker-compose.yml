@@ -1,7 +1,20 @@
-version: '3.7'
+version: '3.9'
 
 services:
+  migrations:
+    container_name: tgfs_migrations
+    build:
+      dockerfile: ./.docker/Dockerfile
+      context: .
+    env_file:
+      - .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: sh entrypoint-migrations.sh
+
   bot:
+    container_name: tgfs_bot
     build:
       dockerfile: ./.docker/Dockerfile
       context: .
@@ -11,8 +24,11 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./.docker/telegram-bot-api-data:/app/telegram-bot-api-data
+    depends_on:
+      - migrations
 
   telegram-bot-api:
+    container_name: tgfs_bot_api
     image: aiogram/telegram-bot-api:latest
     env_file:
       - .env.docker
@@ -20,3 +36,22 @@ services:
       - ./.docker/telegram-bot-api-data:/var/lib/telegram-bot-api
     ports:
       - "8081:8081"
+
+  postgres:
+    container_name: tgfs_db
+    image: postgres:13.7-alpine3.16
+    ports:
+      - "57432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-telegramfs}
+      - POSTGRES_USER=${POSTGRES_USER:-telegramfs}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - PGUSER=${POSTGRES_USER:-telegramfs}
+      - PGDATABASE=${POSTGRES_DB:-telegramfs}
+    volumes:
+      - ./.docker/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

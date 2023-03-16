@@ -1,4 +1,6 @@
+.env
 .env.docker
 .idea
 uploads
 .docker/telegram-bot-api-data
+.docker/postgres-data

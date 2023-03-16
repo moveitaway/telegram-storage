@@ -3,5 +3,6 @@
 .gitignore
 .docker/
 uploads/
+.env
 .env.docker
 README.md

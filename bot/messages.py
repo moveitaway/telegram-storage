@@ -25,5 +25,6 @@ def SAVED(file_path: str, file_size: int, need_preview: bool) -> str:
             f"<b>📁 Location</b>: Inbox\n"
             f"<b>🗒 Name</b>: <code>{os.path.basename(file_path)}</code>\n"
             f"<b>🔢 Size</b>: {human_size(file_size)}\n\n"
-            f"<code>{file_path}</code>" +
-            (f"<a href=\"{file_path}\">ㅤ</a>" if need_preview else ""))
+            f"<code>{file_path}</code>\n\n"
+            "⏱ this message (not file) will be deleted after 30 seconds of inactivity"
+            + (f"<a href=\"{file_path}\">ㅤ</a>" if need_preview else ""))
